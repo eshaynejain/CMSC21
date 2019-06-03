@@ -1,0 +1,899 @@
+#include <stdio.h>
+#include <iostream>
+#include <cstdlib>
+#include <fstream>
+#include <string>
+#include <ctime>
+using namespace std;
+
+
+
+//CLASSES
+class Pokemon {
+public:
+    string name;
+    int stage;
+    int atk;
+    int hp;
+    int gExp;
+};
+class Trainer {
+public:
+    string name;
+    int level;
+    int aml; //at mountain level
+    Pokemon poke1;
+    Pokemon poke2;
+    Pokemon poke3;
+    Pokemon poke4;
+    Pokemon poke5;
+    Pokemon poke6;
+    int pokemonCount;
+    int exp;
+
+    //items
+    int pokeballs;
+    int potions;
+};
+
+//FUNCTIONS
+Pokemon MakesEmptyPokemon() {
+    Pokemon pokemon;
+    pokemon.name = "";
+    pokemon.stage = 0;
+    pokemon.atk = 0;
+    pokemon.hp = 0;
+    pokemon.gExp = 0;
+    return pokemon;
+}
+//this functoin is to return pokemon HP
+int DefaultPokemonHpForStage(int stage){
+    if(stage == 1){
+        return 10;
+    }
+    else if(stage == 2){
+        return 20;
+    }
+    else{
+        return 30;
+    }
+}
+Pokemon MakesPokemon(string name, int stage){
+    Pokemon pokemon;
+
+    pokemon.name = name;
+    pokemon.stage = stage;
+    pokemon.hp = DefaultPokemonHpForStage(stage);
+    //gExp is give way expt to trainer exp
+    if(stage == 1){
+        pokemon.atk = 2;
+        pokemon.gExp = 10;
+    }
+    else if(stage == 2){
+        pokemon.atk = 5;
+        pokemon.gExp = 30;
+    }
+    else{
+        pokemon.atk = 10;
+        pokemon.gExp = 50;
+    }
+
+    return pokemon;
+}
+Trainer MakesTrainer(string name, int level, int aml){
+    Trainer trainer;
+
+    trainer.name = name;
+    trainer.level = level;
+    trainer.aml = aml;
+    trainer.poke1 = MakesEmptyPokemon() ;
+    trainer.poke2 = MakesEmptyPokemon() ;
+    trainer.poke3 = MakesEmptyPokemon() ;
+    trainer.poke4 = MakesEmptyPokemon() ;
+    trainer.poke5 = MakesEmptyPokemon() ;
+    trainer.poke6 = MakesEmptyPokemon() ;
+    trainer.pokemonCount = 0;
+    trainer.exp = 0;
+
+
+    trainer.pokeballs = 10;
+    trainer.potions = 5;
+
+    return trainer;
+}
+//this is to update the trainers aml
+Trainer UpdatesTrainersAml(Trainer trainer) {
+    Trainer addPikaTrainer = trainer;
+
+    if (addPikaTrainer.level >= 10) {
+        addPikaTrainer.aml = 10;
+    }
+    else {
+        addPikaTrainer.aml = addPikaTrainer.level;
+    }
+
+
+    return addPikaTrainer;
+}
+//this function is to update Exp Trainer
+Trainer UpdatesTrainersExp(Trainer trainer, Pokemon wild){
+    Trainer thisTrainer = trainer;
+    thisTrainer.exp = thisTrainer.exp + wild.gExp;
+    if (thisTrainer.level >= 10) {
+        thisTrainer.level = 10;
+        thisTrainer.exp = 0;
+    }
+    else {
+        if(thisTrainer.exp >= 100){
+            thisTrainer.level = thisTrainer.level + 1;
+            thisTrainer.exp = thisTrainer.exp - 100;
+            cout<<"     You Leveled up...\n";
+        }
+    }
+    return thisTrainer;
+}
+//this function adds capture pokemon to trainer
+Trainer AddPokemonToTrainer(Trainer trainer, Pokemon wild){
+    Trainer trainercapture = trainer;
+
+    if (trainercapture.pokemonCount == 1) {
+        cout<<"added 2nd pokemon\n";
+        trainercapture.poke2 = wild;
+        trainercapture.pokemonCount = 2;
+
+    }
+    else if (trainercapture.pokemonCount == 2) {
+        cout<<"added 3rd pokemon\n";
+        trainercapture.poke3 = wild;
+        trainercapture.pokemonCount = 3;
+
+    }
+    else if (trainercapture.pokemonCount == 3) {
+        cout<<"added 4th pokemon\n";
+        trainercapture.poke4 = wild;
+        trainercapture.pokemonCount = 4;
+
+    }
+    else if (trainercapture.pokemonCount == 4) {
+        cout<<"added 5th pokemon\n";
+        trainercapture.poke5 = wild;
+        trainercapture.pokemonCount = 5;
+
+    }
+    else if (trainercapture.pokemonCount == 5) {
+        cout<<"added 6th pokemon\n";
+        trainercapture.poke6 = wild;
+        trainercapture.pokemonCount = 6;
+
+    }
+    else {
+        //select a pokemon to remove
+        cout<<"Pokemon party is now full (6/6)\n";
+        cout<<"You cannot capture anymore\n";
+    }
+    cout<<trainercapture.pokemonCount;
+    return trainercapture;
+
+}
+//this is to add a starting pokemon for the trainer
+Trainer AddPikachuToTrainer(Trainer trainer) {
+    Trainer addPikaTrainer = trainer;
+
+    addPikaTrainer.poke1 = MakesPokemon("Pikachu", 2);
+    addPikaTrainer.pokemonCount = 1;
+
+    return addPikaTrainer;
+}
+//this function is to check the trainer options
+//true = moveup
+//false = walk again
+bool TrainersOptionToWalk() {
+    bool stat = false;
+
+    cout<<"Walk? (input 1) \nMove up? (input 0) \n";
+    cin>>stat;
+    if (stat == 1) {
+        stat = true;
+        cout<<"walking...\n";
+    }
+    else {
+        stat = false;
+        cout<<"moving up...\n";
+    }
+
+    return stat;
+}
+//this function is to generate random trainer names
+string TrainerNameGenerator(){
+    srand((unsigned)time(NULL));
+    int ri;//random integer
+    ri = rand() % 15;
+
+    string arrStageOneTrainerNames[15] = {"Brendan","Acerola","Olivia","Calem","Barry","Jesse","James","Nurse Joy","Draco","Boyle","Ash","Misty","Brock","Ash","Blue"};
+    return arrStageOneTrainerNames[ri];
+}
+//this function is to generate random pokemon names
+string PokemonNameGenerator(int stage){
+    srand((unsigned)time(NULL));
+    int ri; //random integer
+    ri = rand() % 10 + 1;
+
+    /*int lowest = 1, highest = 10;
+    int range=(highest-lowest)+1;
+    ri = lowest+int(range*rand()/(RAND_MAX + 1.0));
+*/
+    string arrStageOneNames[10] = {"Pidgey","Ratata","NidoranF","Shinx","Sewaddle","Snivy","Axew","Fomantis","Inkay","Chimchar"};
+    string arrStageTwoNames[10] = {"Pidgeotto","Raticate","Nidorina","Luxio","Gabite","Servine","Fraxure","Quilladin","Fletchinder","Monferno"};
+    string arrStageThreeNames[10] = {"Pidgeot","Meganium","Nidoqueen","Luxray","Samurott","Serperior","Haxorus","Delphox","Decidueye","Infernape"};
+
+    if(stage == 1){
+        return arrStageOneNames[ri-1];
+    }
+    else if(stage == 2){
+        return arrStageTwoNames[ri-1];
+    }
+    else {
+        return arrStageThreeNames[ri-1];
+    }
+}
+//this function is to randomly check for wild pokemons
+bool ShowRandomPokemon(){
+    srand((unsigned)time(NULL));
+    int ri; //random integer
+    ri = rand() % 10 + 1;
+
+    if(ri <= 5)  {
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+//this funtion is to randomly check for wild trainers
+bool ShowRandomTrainer(){
+    srand((unsigned)time(NULL));
+    int ri; //random integer
+    ri = rand() % 10 + 1;
+
+    if(ri <= 6) {
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+//this function is to get the wild pokemon stage
+int WildPokemonRandomizer(){
+    srand((unsigned)time(NULL));
+    int ri; //random integer
+    ri = rand() % 100 + 1;
+
+    if(ri >= 0 && ri <= 60){
+        ri = 1;
+    }
+    else if(ri >= 61 && ri <= 90){
+        ri = 2;
+    }
+    else {
+        ri = 3;
+    }
+
+    return ri;
+}
+//this function is to generate a wild pokemon
+Pokemon WildPokemonGenerator(int stage){
+    Pokemon wild = MakesPokemon(PokemonNameGenerator(stage), stage);
+    return wild;
+}
+//this function is to generate wild trainers
+Trainer WildTrainerGenerator(int level){
+    Trainer wildtrainer = MakesTrainer(TrainerNameGenerator(),level,0);
+    if (level == 1) {
+        wildtrainer.poke1 = WildPokemonGenerator(1);
+    }
+    else if (level == 2) {
+        wildtrainer.poke1 = WildPokemonGenerator(1);
+        wildtrainer.poke2 = WildPokemonGenerator(2);
+    }
+    else {
+        wildtrainer.poke1 = WildPokemonGenerator(1);
+        wildtrainer.poke2 = WildPokemonGenerator(2);
+        wildtrainer.poke3 = WildPokemonGenerator(3);
+    }
+
+    return wildtrainer;
+}
+//this function is for battle
+bool WonBattleWildPokemon(){
+    srand((unsigned)time(NULL));
+    int ri; //random integer
+    ri = rand() % 2;
+
+    return ri;
+}
+//this function is for hit or miss during battle
+bool IsAttackLanded(){
+    srand((unsigned)time(NULL));
+    int ri; //random integer
+    ri = rand() % 100+1;
+
+    if (ri <= 50) {
+        return false;
+    }
+    else {
+        return true;
+    }
+
+}
+//this function is to heal or not heal trainer's pokemon
+Trainer HealPokemon(Trainer user){
+    Trainer userheal = user;
+
+    if(userheal.potions > 0){
+        for (int x = 1; x <= userheal.pokemonCount; x++) {
+            if (userheal.potions > 0) {
+                if (x == 1 && userheal.poke1.hp <= 0) {
+                    userheal.poke1.hp = DefaultPokemonHpForStage(userheal.poke1.stage);
+                    userheal.potions = userheal.potions - 1;
+                    cout<<"Pokemon healed...\n";
+                }
+                else if (x == 2 && userheal.poke2.hp <= 0) {
+                    userheal.poke2.hp = DefaultPokemonHpForStage(userheal.poke2.stage);
+                    userheal.potions = userheal.potions - 1;
+                    cout<<"Pokemon healed...\n";
+                }
+                else if (x == 3 && userheal.poke3.hp <= 0) {
+                    userheal.poke3.hp = DefaultPokemonHpForStage(userheal.poke3.stage);
+                    userheal.potions = userheal.potions - 1;
+                    cout<<"Pokemon healed...\n";
+                }
+                else if (x == 4 && userheal.poke4.hp <= 0) {
+                    userheal.poke4.hp = DefaultPokemonHpForStage(userheal.poke4.stage);
+                    userheal.potions = userheal.potions - 1;
+                    cout<<"Pokemon healed...\n";
+                }
+                else if (x == 5 && userheal.poke5.hp <= 0) {
+                    userheal.poke5.hp = DefaultPokemonHpForStage(userheal.poke5.stage);
+                    userheal.potions = userheal.potions - 1;
+                    cout<<"Pokemon healed...\n";
+                }
+                else if (x == 6 && userheal.poke6.hp <= 0) {
+                    userheal.poke6.hp = DefaultPokemonHpForStage(userheal.poke6.stage);
+                    userheal.potions = userheal.potions - 1;
+                    cout<<"Pokemon healed...\n";
+                }
+                else {
+
+                }
+            }
+            else {
+                x = 100;
+            }
+        }
+
+        if (userheal.potions < 0) {
+            userheal.potions = 0;
+        }
+    }
+    else{
+        cout<<"You dont have potions anymore.\nYou can get more potions in the next level \n";
+    }
+
+    return userheal;
+}
+//this function is to subtract damage to pokemon hp
+//poke1 is the attacker. poke2 is the receiver of the attack
+//so we will subtract the hp of poke2
+Pokemon SubtractPokemonHp(Pokemon poke1, Pokemon poke2){
+    Pokemon newPoke = poke2;
+    newPoke.hp = newPoke.hp - poke1.atk;
+    return newPoke;
+}
+bool Pokemon1on1Battle(Pokemon poke, Pokemon epoke) {
+    //1 = you won
+    //0 = you lose
+    do {
+        //you
+        if(IsAttackLanded() && poke.hp > 0){
+            epoke = SubtractPokemonHp(poke, epoke);
+            //cout<<"attack landed \n";
+            cout<<poke.name <<" HP: "<<poke.hp<<" VS ";
+            cout<<epoke.name <<" HP: "<<epoke.hp <<"\n\n";
+        }
+        else{
+            //cout<<"attack missed \n";
+        }
+
+        //wild
+        if(IsAttackLanded() && epoke.hp > 0){
+            poke = SubtractPokemonHp(epoke, poke);
+            //cout<<epoke.name <<" attack landed \n";
+            cout<<poke.name <<" HP: "<<poke.hp<<" VS ";
+            cout<<epoke.name <<" HP: "<<epoke.hp <<"\n\n";
+        }
+        else{
+            //cout<<epoke.name <<" attack missed \n";
+        }
+    }
+    while(poke.hp > 0 && epoke.hp > 0);
+
+    if (poke.hp <= 0) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
+//this function is for battle wilt wild trainer
+void BattleWithWildTrainer(Trainer user, Trainer wildTrainer) {
+    Trainer you = user;
+    Trainer wild = wildTrainer;
+
+    int yourWinCount = 0;
+    //poke1 vs poke1
+    if (Pokemon1on1Battle(you.poke1, wild.poke1)) {
+        cout<<"You won the 1st round.\n";
+        yourWinCount++;
+    }
+    else {
+        cout<<"You lose the 1st round.\n";
+    }
+
+    //poke1 vs poke2
+    if (Pokemon1on1Battle(you.poke2, wild.poke2)) {
+        cout<<"You won the 2nd round.\n";
+        yourWinCount++;
+    }
+    else {
+        cout<<"You lose the 2nd round.\n";
+    }
+
+
+    //poke1 vs poke3
+    if (Pokemon1on1Battle(you.poke3, wild.poke3)) {
+        cout<<"You won the 3rd round.\n";
+        yourWinCount++;
+    }
+    else {
+        cout<<"You lose the 3rd round.\n";
+    }
+
+    if (yourWinCount >= 2) {
+        cout<<"You won the battle.\n";
+    }
+    else {
+        cout<<"You lose the battle.\n";
+    }
+}
+//this function is for battle with wild pokemon
+Trainer BattleWithWildPokemon(Trainer user, Pokemon wild){
+    Trainer newUser = user;
+    Pokemon newWild = wild;
+
+    int x = 1;
+
+    do{
+        cout<<"\n";
+        bool hasActivePokemon = false;
+        Pokemon currentPokemon;
+        if (x == 1 && newUser.poke1.hp > 0) {
+            currentPokemon = newUser.poke1;
+            hasActivePokemon = true;
+        }
+        if (x == 2 && newUser.poke2.hp > 0) {
+            currentPokemon = newUser.poke2;
+            hasActivePokemon = true;
+            cout<<"You used your second Pokemon.\n";
+        }
+        if (x == 3 && newUser.poke3.hp > 0) {
+            currentPokemon = newUser.poke3;
+            hasActivePokemon = true;
+            cout<<"You used your third Pokemon.\n";
+        }
+        if (x == 4 && newUser.poke4.hp > 0) {
+            currentPokemon = newUser.poke4;
+            hasActivePokemon = true;
+            cout<<"You used your fourth Pokemon.\n";
+        }
+        if (x == 5 && newUser.poke5.hp > 0) {
+            currentPokemon = newUser.poke5;
+            hasActivePokemon = true;
+            cout<<"You used your fifth Pokemon.\n";
+        }
+        if (x == 6 && newUser.poke6.hp > 0) {
+            currentPokemon = newUser.poke6;
+            hasActivePokemon = true;
+            cout<<"You used your last Pokemon.\n";
+        }
+
+        if (hasActivePokemon) {
+            cout<<currentPokemon.name <<" HP: "<<currentPokemon.hp<<" VS ";
+            cout<<newWild.name <<" HP: "<<newWild.hp <<"\n";
+            do{
+
+                if(currentPokemon.hp > 0){
+                    if(IsAttackLanded()){
+                        newWild = SubtractPokemonHp(currentPokemon, newWild);
+                        cout<<currentPokemon.name <<" HP: "<<currentPokemon.hp<<" VS ";
+                        cout<<newWild.name <<" HP: "<<newWild.hp <<"\n";
+
+                    }
+                    else{
+                    }
+
+
+                    if (newWild.hp > 0) {
+                    //this part here is the wild pokemon attacking the trainer's pokemon
+                        if(IsAttackLanded()){
+                            currentPokemon = SubtractPokemonHp(newWild, currentPokemon);
+                            cout<<currentPokemon.name <<" HP: "<<currentPokemon.hp<<" VS ";
+                            cout<<newWild.name <<" HP: "<<newWild.hp <<"\n";
+                        }
+                        else{
+                        }
+
+                    }
+                    else {
+                        x = 100;
+                        cout<<"Wild Pokemon Defeated \n";
+                        cout<<"Exp: " <<newUser.exp;
+                        newUser = UpdatesTrainersExp(newUser, newWild);
+                        cout<<"(+" <<newWild.gExp  <<") = "<<newUser.exp <<"\n";
+                        cout<<"level: " <<newUser.level <<"\n";
+                    }
+                }
+                else {
+                    x++;
+                    cout<<"Wild Pokemon Defeated your Pokemon\n";
+                    cout<<"Exp: " <<newUser.exp;
+                    newUser = UpdatesTrainersExp(newUser, newWild);
+                    cout<<"(+" <<newWild.gExp  <<") = "<<newUser.exp <<"\n";
+                    cout<<"level: " <<newUser.level <<"\n";
+                }
+
+
+
+
+                if (x == 1) {
+                    newUser.poke1 = currentPokemon;
+                }
+                else if (x == 2) {
+                    newUser.poke2 = currentPokemon;
+                }
+                else if (x == 3) {
+                    newUser.poke3 = currentPokemon;
+                }
+                else if (x == 4) {
+                    newUser.poke4 = currentPokemon;
+                }
+                else if (x == 5) {
+                    newUser.poke5 = currentPokemon;
+                }
+                else {
+                    //x == 6
+                    newUser.poke6 = currentPokemon;
+                }
+
+                if (currentPokemon.hp <= 0) {
+                    x++;
+                    cout<<"Wild " <<newWild.name <<" defeated you!" <<"\n";
+                    cout<<"Exp: " <<newUser.exp <<"\n";
+                    cout<<"level: " <<newUser.level <<"\n";
+                }
+
+            }
+            while(newWild.hp > 0 && currentPokemon.hp > 0);
+        }
+        else {
+            cout<<"You need to heal your Pokemons.\n";
+            newUser = HealPokemon(newUser);
+            x = 100;
+        }
+    }
+    while(x <= newUser.pokemonCount);
+
+    return newUser;
+}
+
+//this function is to check capture pokemon
+bool CapturedPokemon(Pokemon poke){
+    bool stat = false;
+
+    srand((unsigned)time(NULL));
+    int ri; //random integer
+    ri = rand() % 100+1;
+
+    if(poke.stage == 1 && ri <= 40){
+        stat = true;
+    }
+    else if(poke.stage == 2 && ri <= 20){
+        stat = true;
+    }
+    else if(poke.stage == 3 && ri <= 8){
+        stat = true;
+    }
+    else{
+        stat = false;
+    }
+
+    return stat;
+
+}
+//this function is to run away from wild trainer
+int RunFromWildTrainer(){
+    int stat;
+
+    cout<<"Reject battle? (input 1) \nAccept Battle? (input 0)";
+    cin>>stat;
+    if (stat == 1) {
+        cout<<"You rejected the battle.\n";
+    }
+    else {
+        cout<<"You accept the battle, Battle Start\n";
+    }
+    return stat;
+}
+
+//this function is to run away from wild pokemon
+int RunFromWildPokemon(){
+    int stat = 1;
+
+    cout<<"Run? (input 1) \nBattle? (input 2) \nThrow Pokeball? (input 3)";
+    cin>>stat;
+    if (stat == 1) {
+        stat = 1;
+        cout<<"you got away safely...\n";
+    }
+    else if(stat == 2){
+        stat = 2;
+        cout<<"start battle...\n";
+    }
+    else{
+        stat = 3;
+    }
+
+    return stat;
+
+}
+
+
+int main(){
+
+
+    cout<<"\n @@@@    @ @   @   @  @ @ @  @ @   @ @   @ @   @@    @";
+    cout<<"\n @   @  @   @  @  @   @      @  @ @  @  @   @  @ @   @";
+    cout<<"\n @@@@   @   @  @ @    @ @ @  @   @   @  @   @  @  @  @";
+    cout<<"\n @      @   @  @  @   @      @       @  @   @  @   @ @";
+    cout<<"\n @       @ @   @   @  @ @ @  @       @   @ @   @    @@";
+
+    cout<<"\n\nStart Game \n\n";
+
+//Pokemon wildPokemon = MakePokemon("Pidgey", 10, 30, 5);
+//cout<<"A Wild " <<wildPokemon.name <<" has appeared.";
+
+    //getting the name
+    string name;
+    cout<<"Enter your name: ";
+    cin>>name;
+    cout<<"\n\n";
+    //make trainer data after getting the name
+    Trainer user = MakesTrainer(name, 1, 1);
+    user = AddPikachuToTrainer(user);
+
+    Pokemon wildPokemon;
+    Trainer wildTrainer;
+    //cout<<user.name <<"\n";
+    //cout<<user.level <<"\n";
+    //cout<<user.aml <<"\n";
+    //cout<<user.pokemonCount <<"\n";
+    //cout<<user.poke1.name <<"\n\n";
+
+    int mountainLevel = 1;
+    do {
+        if(TrainersOptionToWalk()){
+            Pokemon currentPoke;
+            cout<<"\n\n";
+
+            if(ShowRandomPokemon()){
+                wildPokemon = WildPokemonGenerator(WildPokemonRandomizer());
+                cout<<"A Wild " <<wildPokemon.name <<" appeared.\n";
+                int runn = RunFromWildPokemon();
+                if(runn == 1){
+
+                }
+                else if(runn == 2) {
+                    for (int x = 1; x <= user.pokemonCount; x++) {
+                        if (x == 1) {
+                            if (user.poke1.hp > 0) {
+                                currentPoke = user.poke1;
+                            }
+                        }
+                        if (x == 2) {
+                            if (user.poke1.hp > 0) {
+                                currentPoke = user.poke1;
+                            }
+                            else {
+                                currentPoke = user.poke2;
+                            }
+                        }
+                        if (x == 3) {
+                            if (user.poke1.hp > 0) {
+                                currentPoke = user.poke1;
+                            }
+                            else if (user.poke2.hp > 0){
+                                currentPoke = user.poke2;
+                            }
+                            else {
+                                currentPoke = user.poke3;
+                            }
+                        }
+                        if (x == 4) {
+                            if (user.poke1.hp > 0) {
+                                currentPoke = user.poke1;
+                            }
+                            else if (user.poke2.hp > 0){
+                                currentPoke = user.poke2;
+                            }
+                            else if (user.poke3.hp > 0){
+                                currentPoke = user.poke3;
+                            }
+                            else {
+                                currentPoke = user.poke4;
+                            }
+                        }
+                        if (x == 5) {
+                            if (user.poke1.hp > 0) {
+                                currentPoke = user.poke1;
+                            }
+                            else if (user.poke2.hp > 0){
+                                currentPoke = user.poke2;
+                            }
+                            else if (user.poke3.hp > 0){
+                                currentPoke = user.poke3;
+                            }
+                            else if (user.poke4.hp > 0){
+                                currentPoke = user.poke4;
+                            }
+                            else {
+                                currentPoke = user.poke5;
+                            }
+                        }
+                        if (x == 6) {
+                            if (user.poke1.hp > 0) {
+                                currentPoke = user.poke1;
+                            }
+                            else if (user.poke2.hp > 0){
+                                currentPoke = user.poke2;
+                            }
+                            else if (user.poke3.hp > 0){
+                                currentPoke = user.poke3;
+                            }
+                            else if (user.poke4.hp > 0){
+                                currentPoke = user.poke4;
+                            }
+                            else if (user.poke5.hp > 0){
+                                currentPoke = user.poke5;
+                            }
+                            else {
+                                currentPoke = user.poke6;
+                            }
+                        }
+                    }
+
+                    if (currentPoke.hp > 0) {
+                        user = BattleWithWildPokemon(user, wildPokemon);
+                    }
+                    else {
+                        cout<<"Heal your pokemon 1st... \n";
+                        user = HealPokemon(user);
+                        cout<<"Remaning Potions : " <<user.potions <<"\n";
+                    }
+                }
+                else {
+                    if (user.pokeballs > 0) {
+                        cout<<"You threw a pokeball\n";
+                        if (CapturedPokemon(wildPokemon)) {
+                            user = AddPokemonToTrainer(user,wildPokemon);
+                            cout<<"You captured Wild " <<wildPokemon.name <<"\n";
+                            for (int x = 1; x <= user.pokemonCount; x++) {
+                                if (x == 1) {
+                                    cout<<"Pokemon " <<x <<" : " <<user.poke1.name <<"\n";
+                                }
+                                if (x == 2) {
+                                    cout<<"Pokemon " <<x <<" : " <<user.poke2.name <<"\n";
+                                }
+                                if (x == 3) {
+                                    cout<<"Pokemon " <<x <<" : " <<user.poke3.name <<"\n";
+                                }
+                                if (x == 4) {
+                                    cout<<"Pokemon " <<x <<" : " <<user.poke4.name <<"\n";
+                                }
+                                if (x == 5) {
+                                    cout<<"Pokemon " <<x <<" : " <<user.poke5.name <<"\n";
+                                }
+                                if (x == 6) {
+                                    cout<<"Pokemon " <<x <<" : " <<user.poke6.name <<"\n";
+                                }
+                            }
+                        }
+                        else{
+                            cout<<wildPokemon.name <<" escaped!\n";
+                        }
+                        user.pokeballs = user.pokeballs - 1;
+                        cout<<"Remaning Pokeballs : " <<user.pokeballs <<"\n";
+                    }
+                    else {
+                        cout<<"You dont have anymore Pokeballs.\nYou can get more Pokeball in the next mountain level.\n";
+                    }
+                }
+            }
+            else{
+                if (user.pokemonCount >= 3) {
+                    if (ShowRandomTrainer()) {
+                        wildTrainer = WildTrainerGenerator(3);
+                        cout<<"Trainer " <<wildTrainer.name <<" challenges you to a Pokemon battle.\n";
+                        int runn = RunFromWildTrainer();
+                        if(runn == 1){
+
+                        }
+                        else {
+                            cout<<wildTrainer.name<<" : wait, I'll heal your pokemon 1st.\n";
+                            cout<<"now all your pokemon/s are healed.\n";
+                            cout<<"battle start.\n";
+                            BattleWithWildTrainer(user, wildTrainer);
+                        }
+                    }
+                    else {
+                        cout<<"Still Walking...\n";
+                    }
+                }
+                else {
+                    cout<<"Still Walking...\n";
+                }
+            }
+            cout<<"\n\n";
+        }
+        else {
+            if(user.level > user.aml){
+                //move to next level
+                //update the trainer aml
+                user = UpdatesTrainersAml(user);
+                mountainLevel = user.aml;
+                cout<<"You are now at Mountain Level " <<mountainLevel <<"\n";
+                cout<<"Pokeballs :" <<user.pokeballs <<"(+5)\n";
+                cout<<"Potions   :" <<user.potions <<"(+5)\n";
+
+                user.potions = user.potions + 5;
+                user.pokeballs = user.pokeballs + 5;
+            }
+            else{
+                cout<<"Trainers level is insufficient.\n\n";
+            }
+        }
+    }
+    while (mountainLevel < 10);
+
+    bool answer;
+    Trainer bossbattle;
+    cout<<"You are now facing the BOSS of the mountain\n";
+    cout<<"Fight the BOSS? (Enter 1 if yes) (Enter 0 if no)\n";
+    cin>>answer;
+    if(answer == 1){
+        Trainer bossTrainer = MakesTrainer("Boss Trainer Oak",10,10);
+        bossTrainer.poke1 = MakesPokemon("Venusaur",3);
+        bossTrainer.poke2 = MakesPokemon("Charizard",3);
+        bossTrainer.poke3 = MakesPokemon("Blastoise",3);
+        bossTrainer.pokemonCount = 3;
+        cout<<user.name <<" VS BOSS TRAINER OAK\n";
+        cout<<bossTrainer.name <<": Welcome to the last level! Are you ready to be defeated?\n Let's start the battle \n";
+        BattleWithWildTrainer(user,bossTrainer);
+    }
+    else{
+        cout<<"heal";
+        user = HealPokemon(user);
+        cout<<"Potions : " <<user.potions <<"\n";
+    }
+
+    cout<<"\n\n\n\n";
+    return 0;
+}
